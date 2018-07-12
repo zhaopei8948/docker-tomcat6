@@ -3,7 +3,7 @@ FROM debian:jessie-slim
 ENV LANG C.UTF-8
 
 #COPY java /usr/local/java
-COPY java/jre /usr/local/java
+COPY jre /usr/local/java
 COPY tomcat /usr/local/tomcat
 COPY tomcat-native.tar.gz /usr/local/
 
@@ -26,7 +26,10 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
 # see http://tomcat.10.x6.nabble.com/VOTE-Release-Apache-Tomcat-8-0-32-tp5046007p5046024.html (and following discussion)
 # and https://github.com/docker-library/tomcat/pull/31
 ENV OPENSSL_VERSION 1.1.0f-3+deb9u2
-RUN set -ex; \
+# timezone setting
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone; \
+    set -ex; \
 		if ! grep -q stretch /etc/apt/sources.list; then \
 # only add stretch if we're not already building from within stretch
 			{ \
@@ -48,9 +51,8 @@ RUN set -ex; \
 		fi; \
 		apt-get update; \
 		apt-get install -y --no-install-recommends openssl="$OPENSSL_VERSION"; \
-		rm -rf /var/lib/apt/lists/*;
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
+		rm -rf /var/lib/apt/lists/*; \
+    apt-get update && apt-get install -y --no-install-recommends \
 		bzip2 \
 		unzip \
 		xz-utils \
@@ -61,9 +63,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libapr1-dev \
         libssl-dev \
         make \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN set -eux; \
+	&& rm -rf /var/lib/apt/lists/*; \
+    set -eux; \
     nativeBuildDir="$(mktemp -d)"; \
 	tar -xvf /usr/local/tomcat-native.tar.gz -C "$nativeBuildDir" --strip-components=1; \
 	( \
