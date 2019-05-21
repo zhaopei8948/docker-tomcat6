@@ -5,6 +5,7 @@ ENV LANG C.UTF-8
 #COPY java /usr/local/java
 COPY jre /usr/local/java
 COPY tomcat /usr/local/tomcat
+# COPY tingyun /usr/local/
 COPY tomcat-native.tar.gz /usr/local/
 
 ENV JAVA_HOME /usr/local/java
@@ -49,6 +50,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone; 
 				echo 'Pin-Priority: 990'; \
 			} > /etc/apt/preferences.d/stretch-openssl; \
 		fi; \
+        mv -v /etc/apt/sources.list /etc/apt/sources.list.bak && \
+        echo "deb http://mirrors.163.com/debian/ jessie main non-free contrib" >/etc/apt/sources.list && \
+        echo "deb http://mirrors.163.com/debian/ jessie-proposed-updates main non-free contrib" >>/etc/apt/sources.list && \
+        echo "deb-src http://mirrors.163.com/debian/ jessie main non-free contrib" >>/etc/apt/sources.list && \
+        echo "deb-src http://mirrors.163.com/debian/ jessie-proposed-updates main non-free contrib" >>/etc/apt/sources.list; \
 		apt-get update; \
 		apt-get install -y --no-install-recommends openssl="$OPENSSL_VERSION"; \
 		rm -rf /var/lib/apt/lists/*; \
